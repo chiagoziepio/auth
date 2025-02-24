@@ -29,7 +29,7 @@ export const {
   },
   callbacks: {
     async signIn({ user, account }) {
-      if (account?.provider !== "credentials") {
+      if (account?.provider === "credentials") {
         const existingUser = await db.user.findUnique({
           where: {
             id: user?.id,
@@ -41,6 +41,25 @@ export const {
       }
 
       return true;
+    },
+    async jwt({ token, user, account }) {
+      if (user && account) {
+        token.id = user.id;
+        token.name = user.name;
+        token.email = user.email;
+        // Determine if the sign-in was via OAuth
+        token.isOauth = account.provider !== "credentials";
+      }
+
+      return token;
+    },
+    async session({ token, session }) {
+      if (session.user) {
+        session.user.isOauth = token.isOauth ?? false;
+        session.user.id = token.sub ?? "";
+        session.user.name = token.name ?? "";
+      }
+      return session;
     },
   },
 });

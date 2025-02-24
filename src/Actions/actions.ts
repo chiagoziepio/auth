@@ -189,6 +189,11 @@ export const verifyTokenAction = async (token: string) => {
         emailVerified: new Date(),
       },
     });
+    await db.verificationToken.delete({
+      where: {
+        email: verificationToken.email,
+      },
+    });
     return {
       success: true,
       msg: "token verified",
