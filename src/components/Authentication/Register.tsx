@@ -39,7 +39,7 @@ const Register = () => {
       const res = await registerAction(data);
       if (res.success) {
         setSuccess(res.msg);
-        redirect("auth/login");
+        redirect("/auth/login");
       }
       if (!res.success) {
         if (typeof res.msg === "string") {
@@ -100,7 +100,7 @@ const Register = () => {
           </div>
         </div>
         <AuthProvidersIcon />
-        {/* Todo : add ui for server actions response */}
+
         {success && <SuccessBox text={success} />}
         {error && <ErrorBox text={error} />}
         <Button className="w-full" disabled={isLoading}>

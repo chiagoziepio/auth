@@ -6,6 +6,10 @@ import { Button } from "../ui/button";
 import AuthProvidersIcon from "./AuthProvidersIcon";
 import { useState } from "react";
 import { loginAction } from "@/Actions/actions";
+import ErrorBox from "../Reuseables/ErrorBox";
+import SuccessBox from "../Reuseables/SuccessBox";
+import Link from "next/link";
+import { AiOutlineLoading } from "react-icons/ai";
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -14,6 +18,7 @@ const Login = () => {
   const {
     register,
     handleSubmit,
+    reset,
 
     formState: { errors },
   } = useForm<LoginSchema>();
@@ -21,11 +26,35 @@ const Login = () => {
     try {
       setIsLoading(true);
       const res = await loginAction(data);
+      if (res.success) {
+        if (typeof res.msg === "string") {
+          setSuccess(res.msg);
+        }
+      }
+      if (!res.success) {
+        if (typeof res.msg === "string") {
+          setError(res.msg);
+        } else {
+          const errorMessages = res.msg
+            .map((issue) => issue.message)
+            .join(", ");
+          setError(errorMessages);
+        }
+      }
     } catch (error) {
       console.log(error);
       setIsLoading(false);
+    } finally {
+      reset();
+      setIsLoading(false);
     }
   };
+  if (error || success) {
+    setTimeout(() => {
+      setError("");
+      setSuccess("");
+    }, 5000);
+  }
   return (
     <div>
       <form
@@ -38,6 +67,7 @@ const Login = () => {
           <div>
             <input
               type="email"
+              disabled={isLoading}
               {...register("email", { required: true, minLength: 1 })}
               placeholder="Email"
               className="w-full border-2 border-gray-400 rounded-md p-2 my-2"
@@ -46,7 +76,8 @@ const Login = () => {
           </div>
           <div>
             <input
-              type="text"
+              type="password"
+              disabled={isLoading}
               {...register("password", { required: true, minLength: 6 })}
               placeholder="Password"
               className="w-full border-2 border-gray-400 rounded-md p-2 my-2"
@@ -57,11 +88,17 @@ const Login = () => {
           </div>
         </div>
         <AuthProvidersIcon />
-        {/* Todo : add ui for server actions response */}
-        <Button type="submit" className="w-full">
-          Login
+
+        {error && <ErrorBox text={error} />}
+        {success && <SuccessBox text={success} />}
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          Login{" "}
+          {isLoading && <AiOutlineLoading className="animate-spin" size={20} />}
         </Button>
       </form>
+      <div>
+        Has no account? <Link href={"/auth/register"}>register</Link>
+      </div>
     </div>
   );
 };
