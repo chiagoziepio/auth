@@ -5,7 +5,12 @@ import { loginSchemaZod, registerSchemaZod } from "@/Type/Schema/schema";
 import { LoginSchema, RegisterSchema } from "@/Type/types";
 import bcrypt from "bcrypt-edge";
 import { AuthError } from "next-auth";
-import { signIn } from "../../auth";
+import { signIn, signOut } from "../../auth";
+import {
+  generateVerificationToken,
+  getVerfictionTokenByToken,
+} from "@/lib/utils";
+import { sendMail } from "@/lib/sendMail";
 
 export const loginAction = async (data: LoginSchema) => {
   try {
@@ -17,7 +22,7 @@ export const loginAction = async (data: LoginSchema) => {
     if (!validateData.success) {
       return {
         success: false,
-        msg: validateData.error.errors,
+        msg: "Enter valid credentials",
       };
     }
     const user = await db.user.findUnique({
@@ -39,11 +44,37 @@ export const loginAction = async (data: LoginSchema) => {
         msg: "Invalid credentials",
       };
     }
-    await signIn("credentials", {
+
+    if (!user.emailVerified) {
+      const verificationToken = await generateVerificationToken(email);
+      if (!verificationToken) {
+        return {
+          success: false,
+          msg: "failed to generate verification token",
+        };
+      }
+      const emailVerify = await sendMail(email, verificationToken.token);
+      if (!emailVerify.success) {
+        return {
+          success: false,
+          msg: "failed to send verification email",
+        };
+      }
+      return {
+        success: false,
+        msg: "Please verify your email,  check your email",
+      };
+    }
+
+    const result = await signIn("credentials", {
       email,
       password,
-      callbackUrl: "/dashboard",
+      redirect: false, // Disable automatic redirect
     });
+
+    if (result?.error) {
+      return { success: false, msg: "something went wrong" };
+    }
     return {
       success: true,
       msg: "Login successful",
@@ -59,7 +90,6 @@ export const loginAction = async (data: LoginSchema) => {
       }
     }
   }
-  throw Error;
 };
 
 export const registerAction = async (data: RegisterSchema) => {
@@ -99,15 +129,75 @@ export const registerAction = async (data: RegisterSchema) => {
       },
     });
 
+    const verificationToken = await generateVerificationToken(lowerCaseEmail);
+    if (!verificationToken) {
+      return {
+        success: false,
+        msg: "failed to generate verification token",
+      };
+    }
+    const verEmail = await sendMail(lowerCaseEmail, verificationToken.token);
+
+    if (!verEmail.success) {
+      return {
+        success: false,
+        msg: "failed to send verification email",
+      };
+    }
+
     return {
       success: true,
-      msg: "registration success",
+      msg: "registration success, check your email for verification",
     };
   } catch (error) {
     console.log(error);
     return {
       success: false,
       msg: "registration failed",
+    };
+  }
+};
+
+export const LogoutAction = async () => {
+  await signOut();
+};
+
+export const loginWithGitHubbAction = async () => {
+  await signIn("github", { redirectTo: "/dashboard" });
+};
+
+export const verifyTokenAction = async (token: string) => {
+  try {
+    const verificationToken = await getVerfictionTokenByToken(token);
+    if (!verificationToken) {
+      return {
+        success: false,
+        msg: "invalid token",
+      };
+    }
+    if (verificationToken.expires < new Date()) {
+      return {
+        success: false,
+        msg: "token expired",
+      };
+    }
+    await db.user.update({
+      where: {
+        email: verificationToken.email,
+      },
+      data: {
+        emailVerified: new Date(),
+      },
+    });
+    return {
+      success: true,
+      msg: "token verified",
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      success: false,
+      msg: "failed to verify token",
     };
   }
 };

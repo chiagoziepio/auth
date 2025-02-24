@@ -10,7 +10,7 @@ export const publicRoutes = ["/"];
  * @type {string[]}
  **/
 
-export const authRoutes = ["/auth/login", "/auth/register"];
+export const authRoutes = ["/auth/login", "/auth/register", "/auth/verify"];
 
 /**
  * These routes are used for authentication. They are not protected routes

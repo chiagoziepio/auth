@@ -1,4 +1,5 @@
 import Credentials from "next-auth/providers/credentials";
+import Github from "next-auth/providers/github";
 import type { NextAuthConfig } from "next-auth";
 import { loginSchemaZod } from "@/Type/Schema/schema";
 import { db } from "@/lib/db/db";
@@ -6,6 +7,7 @@ import bcrypt from "bcrypt-edge";
 
 export default {
   providers: [
+    Github,
     Credentials({
       credentials: {
         email: { label: "email", type: "email" },

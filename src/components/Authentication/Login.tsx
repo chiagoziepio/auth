@@ -10,6 +10,7 @@ import ErrorBox from "../Reuseables/ErrorBox";
 import SuccessBox from "../Reuseables/SuccessBox";
 import Link from "next/link";
 import { AiOutlineLoading } from "react-icons/ai";
+import { redirect } from "next/navigation";
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -26,19 +27,17 @@ const Login = () => {
     try {
       setIsLoading(true);
       const res = await loginAction(data);
-      if (res.success) {
-        if (typeof res.msg === "string") {
-          setSuccess(res.msg);
+      if (res!.success) {
+        if (typeof res!.msg) {
+          setSuccess(res!.msg);
+          setTimeout(() => {
+            redirect("/dashboard");
+          }, 4000);
         }
       }
-      if (!res.success) {
-        if (typeof res.msg === "string") {
-          setError(res.msg);
-        } else {
-          const errorMessages = res.msg
-            .map((issue) => issue.message)
-            .join(", ");
-          setError(errorMessages);
+      if (!res!.success) {
+        if (typeof res!.msg) {
+          setError(res!.msg);
         }
       }
     } catch (error) {

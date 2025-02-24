@@ -15,4 +15,32 @@ export const {
     maxAge: 5 * 60 * 60,
   },
   ...authConfig,
+  events: {
+    async linkAccount({ user }) {
+      await db.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          emailVerified: new Date(),
+        },
+      });
+    },
+  },
+  callbacks: {
+    async signIn({ user, account }) {
+      if (account?.provider !== "credentials") {
+        const existingUser = await db.user.findUnique({
+          where: {
+            id: user?.id,
+          },
+        });
+        if (!existingUser || !existingUser.emailVerified) {
+          return false;
+        }
+      }
+
+      return true;
+    },
+  },
 });

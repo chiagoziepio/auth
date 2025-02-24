@@ -13,14 +13,12 @@ const { auth } = NextAuth(authConfig);
 export default auth(async (req) => {
   const { nextUrl } = req;
   const isLoggedin = !!req.auth;
-  console.log(isLoggedin);
 
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
   const isApiAuthRoute = req.nextUrl.pathname.startsWith(apiAuthRoutePrefix);
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
 
   if (isApiAuthRoute) {
-    console.log("isApiAuthRoute");
     return NextResponse.next();
   }
   if (isAuthRoute) {
