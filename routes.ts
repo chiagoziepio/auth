@@ -16,7 +16,7 @@ export const authRoutes = ["/auth/login", "/auth/register", "/auth/verify"];
  * These routes are used for authentication. They are not protected routes
  * @type {string}
  **/
-export const apiAuthRoutePrefix = "/api/auth";
+export const apiAuthRoutePrefix = "/api";
 
 /**
  * This is the default redirect route after login, the entry point after login

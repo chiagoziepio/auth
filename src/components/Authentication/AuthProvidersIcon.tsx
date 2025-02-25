@@ -19,7 +19,7 @@ const AuthProvidersIcon = () => {
     <div className="flex items-center justify-center gap-2 my-3">
       <div
         onClick={loginWithBGithub}
-        className="flex items-center gap-2 border border-black rounded-md p-1 cursor-pointer"
+        className="flex items-center gap-2 border border-black dark:bg-white dark:text-black rounded-md p-1 cursor-pointer"
       >
         <FaGithub size={24} />
         <span>Github</span>

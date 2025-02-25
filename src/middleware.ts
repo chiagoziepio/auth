@@ -18,6 +18,14 @@ export default auth(async (req) => {
   const isApiAuthRoute = req.nextUrl.pathname.startsWith(apiAuthRoutePrefix);
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
 
+  const theme = req.cookies.get("theme")?.value || "system";
+
+  const response = NextResponse.next();
+
+  if (!req.cookies.has("theme")) {
+    response.cookies.set("theme", theme);
+  }
+
   if (isApiAuthRoute) {
     return NextResponse.next();
   }
@@ -35,6 +43,18 @@ export default auth(async (req) => {
     console.log("!isPublicRoute && !isLoggedin");
     return NextResponse.redirect(new URL("/auth/login", nextUrl));
   }
+  const requestHeaders = new Headers(req.headers);
+
+  if (req.auth?.user?.id) {
+    requestHeaders.set("x-user-id", req.auth.user.id);
+  }
+
+  // Return the response with the modified headers
+  return NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
 });
 
 export const config = {

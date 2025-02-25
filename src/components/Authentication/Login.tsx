@@ -59,7 +59,7 @@ const Login = () => {
       <form
         action=""
         onSubmit={handleSubmit(onSubmit)}
-        className="w-[450px] border-gray-400 border-2 rounded-md p-4 shadow-xl"
+        className="w-[450px] border-gray-400 border-2 rounded-md p-4 shadow-xl dark:border-blue-400"
       >
         <AuthFormHeader />
         <div className="flex flex-col gap-4">
@@ -69,7 +69,7 @@ const Login = () => {
               disabled={isLoading}
               {...register("email", { required: true, minLength: 1 })}
               placeholder="Email"
-              className="w-full border-2 border-gray-400 rounded-md p-2 my-2"
+              className="w-full border-2 border-gray-400 rounded-md p-2 my-2 dark:border-blue-400 "
             />
             {errors.email && <p className="text-red-500">Email is required</p>}
           </div>
@@ -79,7 +79,7 @@ const Login = () => {
               disabled={isLoading}
               {...register("password", { required: true, minLength: 6 })}
               placeholder="Password"
-              className="w-full border-2 border-gray-400 rounded-md p-2 my-2"
+              className="w-full border-2 border-gray-400 rounded-md p-2 my-2 dark:border-blue-400"
             />
             {errors.password && (
               <p className="text-red-500">Password is required</p>
